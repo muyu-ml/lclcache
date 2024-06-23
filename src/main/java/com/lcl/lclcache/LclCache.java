@@ -42,4 +42,34 @@ public class LclCache {
             map.put(keys[i], values[i]);
         }
     }
+
+    public int incr(String key) {
+        String str = get(key);
+        int val = 0;
+        try {
+            if(str != null){
+                val = Integer.parseInt(str);
+            }
+            val++;
+            set(key, String.valueOf(val));
+        } catch (NumberFormatException nfe) {
+            throw nfe;
+        }
+        return val;
+    }
+
+    public int decr(String key) {
+        String str = get(key);
+        int val = 0;
+        try {
+            if(str != null){
+                val = Integer.parseInt(str);
+            }
+            val--;
+            set(key, String.valueOf(val));
+        } catch (NumberFormatException nfe) {
+            throw nfe;
+        }
+        return val;
+    }
 }

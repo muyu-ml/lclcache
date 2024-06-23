@@ -100,6 +100,7 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
             }
             integer(ctx, CACHE.exists(keys));
         } else if("MGET".equals(cmd)) {
+            // *3,$4,mget,$2,k1,$2,k2
             int len = (args.length -3)/2;
             String[] keys = new String[len];
             for(int i=0;i<len; i++){
@@ -107,6 +108,7 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
             }
             array(ctx, CACHE.mget(keys));
         } else if("MSET".equals(cmd)) {
+            // *5,$4,mset,$2,k1,$2,v1,$2,k2,$2,v2
             int len = (args.length -3)/4;
             String[] keys = new String[len];
             String[] values = new String[len];
@@ -116,6 +118,20 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
             }
             CACHE.mset(keys, values);
             simpleString(ctx, OK);
+        } else if("INCR".equals(cmd)) {
+            String key = args[4];
+            try{
+                integer(ctx, CACHE.incr(key));
+            }catch (NumberFormatException nfe) {
+                error(ctx, "NFE " + key + " value " + CACHE.get(key) + " is not an integer ");
+            }
+        }  else if("DECR".equals(cmd)) {
+            String key = args[4];
+            try{
+                integer(ctx, CACHE.decr(key));
+            }catch (NumberFormatException nfe) {
+                error(ctx, "NFE " + key + " value" + CACHE.get(key) + " is not an integer ");
+            }
         } else {
             simpleString(ctx, OK);
         }
@@ -124,6 +140,19 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
 
 
     private void array(ChannelHandlerContext ctx, String[] array){
+        writeByteBuf(ctx, arrayEncode(array));
+    }
+
+    private void error(ChannelHandlerContext ctx, String msg){
+        writeByteBuf(ctx, errorEncode(msg));
+    }
+
+
+    private static String errorEncode(String msg){
+        return "-" + msg + CRLF;
+    }
+
+    private static String arrayEncode(Object[] array){
         StringBuilder sb = new StringBuilder();
         if(array == null) {
             sb.append("*-1").append(CRLF);
@@ -132,16 +161,34 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
         } else {
             sb.append("*" + array.length + CRLF);
             for (int i=0;i< array.length;i++){
-                sb.append("$").append(array[i].length()).append(CRLF).append(array[i]).append(CRLF);
+                Object obj = array[i];
+                if(obj == null){
+                    sb.append("$-1").append(CRLF);;
+                } else if (obj instanceof Integer) {
+                    sb.append(integerEncode((Integer) obj));
+                } else if (obj instanceof String) {
+                    sb.append(bulkStringEncode((String) obj));
+                } else if (obj instanceof Object[]) {
+                    sb.append(arrayEncode((Object[]) obj));
+                }
             }
         }
-        writeByteBuf(ctx, sb.toString());
+        return sb.toString();
     }
+
     private void integer(ChannelHandlerContext ctx, int i){
-        writeByteBuf(ctx, ":" + i + CRLF);
+        writeByteBuf(ctx, integerEncode(i));
     }
 
     private void bulkString(ChannelHandlerContext ctx, String content){
+        writeByteBuf(ctx, bulkStringEncode(content));
+    }
+
+    private static String integerEncode(int i){
+        return ":" + i + CRLF;
+    }
+
+    private static String bulkStringEncode(String content){
         String ret;
         // 对 null 、空字符串做单独处理
         if(content == null){
@@ -151,10 +198,10 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
         } else {
             ret = content.getBytes().length + CRLF + content;
         }
-        writeByteBuf(ctx, BULK_PREFIX + ret + CRLF);
+        return BULK_PREFIX + ret + CRLF;
     }
 
-    private void simpleString(ChannelHandlerContext ctx, String content){
+    private static String simpleStringEncode(String content){
         String ret;
         // 对 null 、空字符串做单独处理
         if(content == null){
@@ -164,7 +211,11 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
         } else {
             ret = STRING_PREFIX + content;
         }
-        writeByteBuf(ctx, ret + CRLF);
+        return ret + CRLF;
+    }
+
+    private void simpleString(ChannelHandlerContext ctx, String content){
+        writeByteBuf(ctx, simpleStringEncode(content));
     }
 
     private void writeByteBuf(ChannelHandlerContext ctx, String content){
