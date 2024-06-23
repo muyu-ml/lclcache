@@ -1,5 +1,8 @@
-package com.lcl.lclcache;
+package com.lcl.lclcache.core;
 
+import com.lcl.lclcache.LclPlugin;
+import com.lcl.lclcache.core.LclCacheDecoder;
+import com.lcl.lclcache.core.LclCacheHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -7,8 +10,6 @@ import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.redis.RedisDecoder;
-import io.netty.handler.codec.redis.RedisEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public class LclCacheServer implements LclPlugin{
+public class LclCacheServer implements LclPlugin {
 
     int port = 6379;
     EventLoopGroup bossGroup;
