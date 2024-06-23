@@ -1,0 +1,8 @@
+spring:
+    application:
+        name: lclcache
+
+#logging:
+#    level:
+#        root: debug
+#        org.springframework: TRACE
