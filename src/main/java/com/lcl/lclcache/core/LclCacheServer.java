@@ -54,7 +54,6 @@ public class LclCacheServer implements LclPlugin {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new LclCacheDecoder());
-//                            ch.pipeline().addLast(new RedisEncoder());
                             ch.pipeline().addLast(new LclCacheHandler());
                         }
                     });
