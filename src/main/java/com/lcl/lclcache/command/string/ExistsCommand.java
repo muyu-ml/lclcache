@@ -1,4 +1,4 @@
-package com.lcl.lclcache.command;
+package com.lcl.lclcache.command.string;
 
 import com.lcl.lclcache.core.Command;
 import com.lcl.lclcache.core.LclCache;

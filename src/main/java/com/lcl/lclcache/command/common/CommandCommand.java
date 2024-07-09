@@ -1,22 +1,26 @@
-package com.lcl.lclcache.command;
+package com.lcl.lclcache.command.common;
 
 import com.lcl.lclcache.core.Command;
+import com.lcl.lclcache.core.Commands;
 import com.lcl.lclcache.core.LclCache;
 import com.lcl.lclcache.core.Reply;
+
+import java.time.LocalDate;
 
 /**
  * @Author conglongli
  * @date 2024/6/23 20:32
  */
-public class MgetCommand implements Command {
+public class CommandCommand implements Command {
+
     @Override
     public String name() {
-        return "MGET";
+        return "COMMAND";
     }
 
     @Override
     public Reply<?> exec(LclCache cache, String[] args) {
-        String[] keys = getParams(args);
-        return Reply.array(cache.mget(keys));
+        return Reply.array(Commands.getCommandNames());
     }
+
 }
