@@ -1,9 +1,10 @@
 package com.lcl.lclcache.core;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.*;
 
 /**
  * cache entries
@@ -12,14 +13,18 @@ import java.util.Objects;
  */
 public class LclCache {
 
-    Map<String, String> map = new HashMap<>();
+    Map<String, CacheEntry<?>> map = new HashMap<>();
+
+    // =============== 1.String begin ===============
 
     public String get(String key) {
-        return map.get(key);
+        CacheEntry<String> cacheEntry = (CacheEntry<String>) map.get(key);
+        return cacheEntry.getValue();
     }
 
     public void set(String key, String value) {
-        map.put(key, value);
+        CacheEntry<String> cacheEntry = new CacheEntry<>(value);
+        map.put(key, cacheEntry);
     }
 
     public int del(String...keys){
@@ -31,7 +36,8 @@ public class LclCache {
     }
 
     public String[] mget(String...keys){
-        return keys == null ? new String[0] : Arrays.stream(keys).map(map :: get).toArray(String[]::new);
+        return keys == null ? new String[0] : Arrays.stream(keys)
+                .map(this :: get).toArray(String[]::new);
     }
 
     public void mset(String[] keys, String[] values) {
@@ -39,7 +45,7 @@ public class LclCache {
             return;
         }
         for(int i=0; i< keys.length; i++){
-            map.put(keys[i], values[i]);
+            set(keys[i], values[i]);
         }
     }
 
@@ -74,7 +80,136 @@ public class LclCache {
     }
 
     public Integer strlen(String key) {
-        String value = map.get(key);
+        String value = get(key);
         return value == null ? 0 : value.length();
+    }
+
+    // =============== 1.String end ===============
+
+
+
+    // =============== 2.list begin ===============
+
+    public Integer lpush(String key, String...vals) {
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            cacheEntry = new CacheEntry<>(new LinkedList<>());
+            map.put(key, cacheEntry);
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+        Arrays.stream(vals).forEach(list :: addFirst);
+        return vals.length;
+    }
+
+    public String[] lpop(String key, int count) {
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+        if(list == null){
+            return null;
+        }
+        int len = Math.min(count, list.size());
+        String[] ret = new String[len];
+
+        int index = 0;
+        while(index < len){
+            ret[index++] = list.removeFirst();
+        }
+        return ret;
+    }
+
+
+    public Integer rpush(String key, String...vals) {
+        if(vals == null){
+            return 0;
+        }
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            cacheEntry = new CacheEntry<>(new LinkedList<>());
+            map.put(key, cacheEntry);
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+//        Arrays.stream(vals).forEach(list :: addLast);
+        list.addAll(List.of(vals));
+        return vals.length;
+    }
+
+    public String[] rpop(String key, int count) {
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+        if(list == null){
+            return null;
+        }
+        int len = Math.min(count, list.size());
+        String[] ret = new String[len];
+
+        int index = 0;
+        while(index < len){
+            ret[index++] = list.removeLast();
+        }
+        return ret;
+    }
+
+    public Integer llen(String key) {
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return 0;
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+        if(list == null){
+            return 0;
+        }
+        return list.size();
+    }
+
+    public String lindex(String key, int index) {
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+        if(list == null){
+            return null;
+        }
+        if(index >= list.size()){
+            return null;
+        }
+        return list.get(index);
+    }
+
+    public String[] lrange(String key, int start, int end) {
+        CacheEntry<LinkedList<String>> cacheEntry = (CacheEntry<LinkedList<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedList<String> list = cacheEntry.getValue();
+        if(list == null){
+            return null;
+        }
+        int size = list.size();
+        if(start >= size) {
+            return null;
+        }
+        if(end >= size || end == -1){
+            end = size - 1;
+        }
+        int len = Math.min(size, end - start + 1);
+        String[] ret = new String[len];
+        for (int i=0;i<len;i++){
+            ret[i] = list.get(start+i);
+        }
+        return ret;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CacheEntry<T> {
+        private T value;
     }
 }

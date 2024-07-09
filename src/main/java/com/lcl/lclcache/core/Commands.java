@@ -3,6 +3,7 @@ package com.lcl.lclcache.core;
 import com.lcl.lclcache.command.common.CommandCommand;
 import com.lcl.lclcache.command.common.InfoCommand;
 import com.lcl.lclcache.command.common.PingCommand;
+import com.lcl.lclcache.command.list.*;
 import com.lcl.lclcache.command.string.*;
 
 import java.util.LinkedHashMap;
@@ -38,6 +39,13 @@ public class Commands {
         registry(new MgetCommand());
 
         // LIST COMMAND
+        registry(new LpushCommand());
+        registry(new LpopCommand());
+        registry(new RpushCommand());
+        registry(new RpopCommand());
+        registry(new LlenCommand());
+        registry(new LIndexCommand());
+        registry(new LRangeCommand());
     }
 
     public static void registry(Command command){
