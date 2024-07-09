@@ -1,4 +1,4 @@
-package com.lcl.lclcache;
+package com.lcl.lclcache.core;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,5 +71,10 @@ public class LclCache {
             throw nfe;
         }
         return val;
+    }
+
+    public Integer strlen(String key) {
+        String value = map.get(key);
+        return value == null ? 0 : value.length();
     }
 }
