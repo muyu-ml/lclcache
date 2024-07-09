@@ -3,7 +3,6 @@ package com.lcl.lclcache.core;
 import com.lcl.lclcache.command.common.CommandCommand;
 import com.lcl.lclcache.command.common.InfoCommand;
 import com.lcl.lclcache.command.common.PingCommand;
-import com.lcl.lclcache.command.set.*;
 import com.lcl.lclcache.command.list.*;
 import com.lcl.lclcache.command.string.*;
 
@@ -47,18 +46,6 @@ public class Commands {
         registry(new LlenCommand());
         registry(new LIndexCommand());
         registry(new LRangeCommand());
-
-        // HASH COMMAND
-
-        // SET COMMAND
-        registry(new SaddCommand());
-        registry(new SmembersCommand());
-        registry(new SismemberCommand());
-        registry(new ScardCommand());
-        registry(new SremoveCommand());
-        registry(new SpopCommand());
-        //
-
     }
 
     public static void registry(Command command){

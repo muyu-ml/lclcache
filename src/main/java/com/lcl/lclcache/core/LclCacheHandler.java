@@ -38,14 +38,10 @@ public class LclCacheHandler extends SimpleChannelInboundHandler<String> {
 
         Command command = Commands.get(cmd);
         if(command != null){
-            try{
-                Reply<?> reply = command.exec(CACHE, args);
-                log.info("CMD[" + cmd + "] => " + reply.type + "=>" + reply.value);
-                replyContext(ctx, reply);
-            } catch (Exception e) {
-                Reply<String> reply = Reply.error("EXP exception with msg '" + e.getMessage() + "'");
-                replyContext(ctx, reply);
-            }
+            Reply<?> reply = command.exec(CACHE, args);
+            log.info("CMD[" + cmd + "] => " + reply.type + "=>" + reply.value);
+            replyContext(ctx, reply);
+//            return;
         }else {
             Reply<String> reply = Reply.error("ERR unsupported command '" + cmd + "'");
             replyContext(ctx, reply);
