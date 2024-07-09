@@ -206,6 +206,95 @@ public class LclCache {
         return ret;
     }
 
+    // =============== 2.list end ===============
+
+
+    // =============== 3.set begin ===============
+
+    public Integer sadd(String key, String[] vals) {
+        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
+        if(cacheEntry == null ){
+            cacheEntry = new CacheEntry<>(new LinkedHashSet<>());
+            map.put(key, cacheEntry);
+        }
+        HashSet<String> set = cacheEntry.getValue();
+        set.addAll(Arrays.asList(vals));
+        return vals.length;
+    }
+
+    public String[] smembers(String key) {
+        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedHashSet<String> set = cacheEntry.getValue();
+        if(set == null){
+            return null;
+        }
+        return set.toArray(String[]::new);
+    }
+
+    public Integer scard(String key) {
+        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedHashSet<String> set = cacheEntry.getValue();
+        if(set == null){
+            return null;
+        }
+        return set.size();
+    }
+
+    public Integer issmember(String key, String val) {
+        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return 0;
+        }
+        LinkedHashSet<String> set = cacheEntry.getValue();
+        if(set == null){
+            return 0;
+        }
+        return set.contains(val) ? 1: 0;
+    }
+
+    public Integer sremove(String key, String[] vals) {
+        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return 0;
+        }
+        LinkedHashSet<String> set = cacheEntry.getValue();
+        if(set == null){
+            return 0;
+        }
+        return vals == null ? 0 : (int)Arrays.stream(vals).map(set :: remove).filter(x -> x).count();
+    }
+
+    Random random = new Random();
+    public String[] spop(String key, int count) {
+        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedHashSet<String> set = cacheEntry.getValue();
+        if(set == null){
+            return null;
+        }
+        int len = Math.min(count, set.size());
+        String[] ret = new String[len];
+
+        int index = 0;
+        while(index < len){
+            // 随机删除一个元素
+            String obj = set.toArray(String[]::new)[random.nextInt(set.size())];
+            set.remove(obj);
+            ret[index++] = obj;
+        }
+        return ret;
+    }
+
+    // =============== 3.set end ===============
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
