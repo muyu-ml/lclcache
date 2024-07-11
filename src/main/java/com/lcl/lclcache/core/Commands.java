@@ -7,6 +7,7 @@ import com.lcl.lclcache.command.hash.*;
 import com.lcl.lclcache.command.set.*;
 import com.lcl.lclcache.command.list.*;
 import com.lcl.lclcache.command.string.*;
+import com.lcl.lclcache.command.zset.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -67,8 +68,13 @@ public class Commands {
         registry(new HdelCommand());
 
 
-        //
-
+        // ZSET COMMAND
+        registry(new ZaddCommand());
+        registry(new ZcardCommand());
+        registry(new ZcountCommand());
+        registry(new ZrankCommand());
+        registry(new ZrevCommand());
+        registry(new ZscoreCommand());
     }
 
     public static void registry(Command command){

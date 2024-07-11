@@ -236,14 +236,11 @@ public class LclCache {
     }
 
     public Integer scard(String key) {
-        CacheEntry<LinkedHashSet<String>> cacheEntry = (CacheEntry<LinkedHashSet<String>>) map.get(key);
-        if(cacheEntry == null ){
+        CacheEntry<?> cacheEntry = map.get(key);
+        if(cacheEntry == null){
             return null;
         }
-        LinkedHashSet<String> set = cacheEntry.getValue();
-        if(set == null){
-            return null;
-        }
+        LinkedHashSet<?> set = (LinkedHashSet<?>)cacheEntry.getValue();
         return set.size();
     }
 
@@ -390,10 +387,88 @@ public class LclCache {
     // =============== 4.hash end ===============
 
 
+
+
+    // =============== 5.zset end ===============
+
+    public Integer zadd(String key, String[] vals, double[] scores) {
+        CacheEntry<LinkedHashSet<ZsetEntry>> cacheEntry = (CacheEntry<LinkedHashSet<ZsetEntry>>) map.get(key);
+        if(cacheEntry == null ){
+            cacheEntry = new CacheEntry<>(new LinkedHashSet<>());
+            map.put(key, cacheEntry);
+        }
+        LinkedHashSet<ZsetEntry> hashSet = cacheEntry.getValue();
+        for(int i=0; i<vals.length; i++){
+            hashSet.add(new ZsetEntry(vals[i], scores[i]));
+        }
+        return vals.length;
+    }
+
+    public Integer zcard(String key) {
+        CacheEntry<?> cacheEntry = map.get(key);
+        if(cacheEntry == null ){
+            return null;
+        }
+        LinkedHashSet<?> set = (LinkedHashSet<?>)cacheEntry.getValue();
+        return set.size();
+    }
+
+    public Integer zcount(String key, double min, double max) {
+        CacheEntry<?> cacheEntry = map.get(key);
+        if(cacheEntry == null){
+            return null;
+        }
+        LinkedHashSet<ZsetEntry> set = (LinkedHashSet<ZsetEntry>)cacheEntry.getValue();
+        return (int)set.stream().filter(x -> x.getScore() >= min && x.getScore() <= max).count();
+    }
+
+    public Double zscore(String key, String val) {
+        CacheEntry<?> cacheEntry = map.get(key);
+        if(cacheEntry == null){
+            return null;
+        }
+        LinkedHashSet<ZsetEntry> set = (LinkedHashSet<ZsetEntry>)cacheEntry.getValue();
+        return set.stream().filter(x -> x.getValue().equals(val)).map(ZsetEntry::getScore).findFirst().orElse(null);
+    }
+
+    public Integer zrank(String key, String val) {
+        CacheEntry<?> cacheEntry = map.get(key);
+        if(cacheEntry == null){
+            return null;
+        }
+        LinkedHashSet<ZsetEntry> set = (LinkedHashSet<ZsetEntry>)cacheEntry.getValue();
+        Double zscore = zscore(key, val);
+        if(zscore == null){
+            return null;
+        }
+        return (int)set.stream().filter(x -> x.getScore() < zscore).count();
+    }
+
+    public Integer zrem(String key, String[] vals) {
+        CacheEntry<?> cacheEntry = map.get(key);
+        if(cacheEntry == null){
+            return null;
+        }
+        LinkedHashSet<ZsetEntry> set = (LinkedHashSet<ZsetEntry>)cacheEntry.getValue();
+        return vals == null ? 0 : (int)Arrays.stream(vals).map(x -> set.removeIf(y -> y.getValue().equals(x))).filter(x -> x).count();
+    }
+
+    // =============== 5.zset end ===============
+
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CacheEntry<T> {
         private T value;
+    }
+
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ZsetEntry{
+        private String value;
+        private double score;
     }
 }
