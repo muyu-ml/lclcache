@@ -1,4 +1,4 @@
-package com.lcl.lclcache.command.set;
+package com.lcl.lclcache.command.hash;
 
 import com.lcl.lclcache.core.Command;
 import com.lcl.lclcache.core.LclCache;
@@ -8,16 +8,17 @@ import com.lcl.lclcache.core.Reply;
  * @Author conglongli
  * @date 2024/6/23 20:32
  */
-public class SremoveCommand implements Command {
+public class HsetCommand implements Command {
     @Override
     public String name() {
-        return "SREMOVE";
+        return "HSET";
     }
 
     @Override
     public Reply<?> exec(LclCache cache, String[] args) {
         String key = getKey(args);
-        String[] vals = getParamsNoKey(args);
-        return Reply.integer(cache.sremove(key, vals));
+        String[] hkeys = getHKeys(args);
+        String[] hvalues = getHValues(args);
+        return Reply.integer(cache.hset(key, hkeys, hvalues));
     }
 }
