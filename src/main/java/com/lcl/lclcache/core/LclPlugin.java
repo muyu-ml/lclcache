@@ -1,4 +1,4 @@
-package com.lcl.lclcache;
+package com.lcl.lclcache.core;
 
 /**
  * lcl cache plugin

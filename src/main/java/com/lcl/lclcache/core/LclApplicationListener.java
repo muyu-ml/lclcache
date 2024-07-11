@@ -1,4 +1,4 @@
-package com.lcl.lclcache;
+package com.lcl.lclcache.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
